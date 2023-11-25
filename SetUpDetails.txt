@@ -1,0 +1,91 @@
+-------------------------------------------
+
+Node and Npm install:
+sudo apt update
+sudo apt install nodejs
+check version of node ans npm  
+node -> node -v;    
+Npm ->  npm -v
+
+----------------------------------------------------
+If node install but NPM not install.
+Install npm using the Node Version Manager (NVM): NVM allows you to install multiple versions of Node.js and npm. Run the following commands to install NVM:
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+source ~/.bashrc
+
+nvm install node
+
+nvm use node
+--------------------------------------------
+React app install
+go to the admin path  cd var/www/admin
+then put :   npx create-react-app client 
+---------------------------------------------------
+
+dependency package
+go to the client path  cd var/www/admin/client
+put this line   ---> npm i react-router-dom axios antd
+
+__________________________________________________
+project set up using vite  
+npm create vite@latest
+____________________________________________
+get node module folder   npm install
+
+
+
+---------------------------------------------
+server run  ===>
+go to cd backend folder and type --> nodemon server.js
+client run ====> 
+go to the cd client and type -->  npm run dev
+
+login credential  
+user   >   alam@gmail.com  // 123456
+admin  >   shubhraprakash.nandi@isubsoft.com  // 123456
+
+
+latest update   ---> 
+in client    upto session check
+in backend   session update...
+
+generate a unique session ID
+
+change in package.json
+"dependencies": {
+  "eslint": "^8.0.0",
+  "eslint-plugin-react": "^8.0.0",
+  "eslint-plugin-react-hooks": "^8.0.0",
+  // ... other dependencies
+}
+
+
+
+npm install --legacy-peer-deps
+npm install uuid --force
+
+Save the session ID in a cookie
+npm install js-cookie --force
+
+database MongoDB
+
+sudo systemctl start mongod --> press enter
+mongo  -->press enter
+
+______________________________________________
+Project Run
+
+server run  ===>
+go to terminal and cd backend folder and type
+1. npm install
+2.nodemon server.js
+
+
+client run ====> 
+go to terminal and cd client and type 
+1. npm install
+2.npm run dev
+
+
