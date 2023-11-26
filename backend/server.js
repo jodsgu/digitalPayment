@@ -1,149 +1,43 @@
 const express = require("express");
-const { createProxyMiddleware } = require('http-proxy-middleware');
-const cors = require('cors')
-const app = express();
+const cors = require('cors');
+//const bodyParser = require('body-parser');
+//const { createProxyMiddleware } = require('http-proxy-middleware');
+
 const dbConnection = require('./db');
-const Urlmaping = require('./api/models/urlmapings')
-const mapLoginFormToApi = require('./api/library/loginFieldMapping');
-//router
-const userRouter = require('./api/routes/user');
+//const UrlMapping = require('./api/models/urlmapings');
+const port = 3000;
+
+const app = express();
 
 app.use(cors());
 dbConnection();
 
+//import proxy middleware
+const targetProxyMiddleware = require('./api/middlewares/proxy-middleware')
 
-// Use express.json() middleware conditionally
-app.use((req, res, next) => {
-  if (req.path.startsWith('/users')) {
-    // Only use express.json() for requests with '/users' in the path
-    express.json()(req, res, next);
-  } else {
-    next();
+
+
+
+// Dynamically route requests based on URL path
+app.all('*', async (req, res, next) => {
+  try {
+    const path = req.url; // Extract the path from the URL
+    console.log("Requested path:", path);
+
+    // Proxy the request to the target server, replacing the path with the action_url
+    targetProxyMiddleware(req, res, next, {});
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
 
-// Use express.json() middleware conditionally for '/login' path
-//app.use('/login', express.json());
-
-// Fetch all mappings from the MongoDB collection
-const fetchMappings = async () => {
-  try {
-    return await Urlmaping.find({});
-  } catch (error) {
-    console.error("Error fetching mappings:", error);
-    return [];
-  }
-};
-
-
-
-// Define a custom proxy middleware for each mapping  //this okk
-const createProxyForMapping = async () => {
-  const mappings = await fetchMappings();
-
-
-
-  mappings.forEach(({ path, action_url }) => {
-    let pathRewrite;
-    console.log(path)
-    if (path === '/login') {
-      pathRewrite = {
-        [`^${path}`]: action_url,
-      };
-      /* // Map form fields to API fields for '/login'
-      pathRewrite = async (originalPath, req) => {
-        try {
-          console.log("222", req.body)
-          const apiRequest = await mapLoginFormToApi(req.body);
-          // Log the mapped API request (for debugging purposes)
-          if (Object.keys(apiRequest).length > 0) {
-            console.log('Mapped API Request:', apiRequest);
-            console.log("aaaaaaa");
-            // Return the rewritten path directly
-            console.log('pathRewrite:', action_url );
-            return action_url;
-
-          } else {
-            console.log("bbbbbbbb")
-            console.log("from field missing to api field data")
-            return action_url
-          }
-          //console.log('Mapped API Request:', apiRequest);
-          //console.log("new path",action_url);
-          // return action_url;
-
-        } catch (error) {
-          console.error("Error mapping form to API for '/login':", error);
-          throw error; // Propagate the error
-        }
-      }; */
-
-
-
-
-
-
-    }
-    else if (path.startsWith('/user-details/')) {
-      pathRewrite = (originalPath, req) => {
-        // Extract the dynamic user_id from the path
-        const user_id = req.params.user_id;
-        const modifiedActionUrl = action_url.replace(':user_id', user_id);
-        return originalPath.replace(`/user-details/${user_id}`, modifiedActionUrl);
-      };
-
-    }
-    else if (path === '/role-maps') {
-      pathRewrite = (originalPath, req) => {
-        // Handle dynamic query parameters for '/roleMaps' here
-        const queryParams = {
-          action: req.query.action || 'default',
-          'filter-user-id': req.query['filter-user-id'] || 'default',
-        };
-
-        const queryString = Object.entries(queryParams)
-          .map(([key, value]) => `${key}=${value}`)
-          .join('&');
-        //console.log("Redirecting to:", `${action_url}?${queryString}`);
-        return `${action_url}?${queryString}`;
-      };
-    }
-
-// console.log(path)
-    app.use(path, createProxyMiddleware({
-      target: 'http://10.0.253.185',
-      changeOrigin: true,
-      pathRewrite,
-      onProxyRes: function (proxyRes, req, res) {
-        proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-      },
-      onProxyReq: function (proxyReq, req, res) {
-        // Log the request details including the payload
-        console.log('Request details:');
-        console.log('Method:', req.method);
-        console.log('Original URL:', req.originalUrl);
-        console.log('Rewritten URL:', req.url);
-        console.log('Headers:', req.headers);
-    
-        // If it's a POST request, log the payload
-        if (req.method === 'POST' && req.body) {
-          console.log('Payload:', req.body);
-        }
-      },
-    }));
-  });
-};
-
-// Create proxy middleware for each mapping
-createProxyForMapping();
-//all end point list
-app.use('/users', userRouter);
 
 
 
 // Start the server
-const port = 3000; // or any other port you prefer
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

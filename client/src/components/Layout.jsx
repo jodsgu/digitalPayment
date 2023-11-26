@@ -29,7 +29,7 @@ const Layout = ({ children }) => {
       const parseToken = JSON.parse(auth);
       // console.log("fdgsdfgs77",parseToken);
       //const res = await axios.get(`http://localhost:3000/api/v1/users/${user_id}`, {
-      const res = await axios.get(`http://localhost:3000/user-details/${user_id}`, {
+      const res = await axios.post(`http://localhost:3000/user-details/${user_id}`, {
         headers: {
           Authorization: `Bearer ${parseToken}`
         }
