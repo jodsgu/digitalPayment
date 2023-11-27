@@ -11,10 +11,11 @@ const mapLoginFormToApi = require('../library/login-field-mapping');
 const targetProxyMiddleware = createProxyMiddleware({
   target: 'http://10.0.253.185',
   changeOrigin: true,
+  ws: true,
   pathRewrite: async (path, req) => {
     // Parse JSON from the request body
 
-    console.log("mmmmmmm-->", req.body)
+   // console.log("mmmmmmm-->", req.body)
     // Extract the path from the URL
     const requestedPath = req.url;
     // Remove query parameters from the path for lookup
@@ -33,13 +34,13 @@ const targetProxyMiddleware = createProxyMiddleware({
         /* // Handle "/login" case
         // Map login form fields to API fields using the library function
 
-        console.log("77777");
-        const mappedPayload = await mapLoginFormToApi(req.body);
-        console.log("88888");
-        let myobj = {test1:'test1',test2:'test2'}
+       // console.log("77777");
+       // const mappedPayload = await mapLoginFormToApi(req.body);
+       // console.log("88888");
+      //  let myobj = {test1:'test1',test2:'test2'}
         // Log the mapped payload (for debugging purposes)
-        console.log('Mapped Login Payload:', mappedPayload);
-        req.body = mappedPayload;
+        //console.log('Mapped Login Payload:', mappedPayload);
+        //req.body = mappedPayload;
         
 
 
@@ -51,12 +52,14 @@ const targetProxyMiddleware = createProxyMiddleware({
         // Handle "/login" case
         // Map login form fields to API fields using the library function
         const mappedPayload = await mapLoginFormToApi(req.body);
-
+        //console.log(">>>>>>>>",typeof mappedPayload)
         // Update Content-Length header based on mapped payload
         req.headers['Content-Length'] = Buffer.byteLength(JSON.stringify(mappedPayload));
 
         // Replace request body with mapped payload
+        
         req.body = JSON.stringify(mappedPayload);
+        console.log(";;;;;;;;;",typeof req.body)
 
         // Log the mapped payload (for debugging purposes)
         console.log('Mapped Login Payload:', mappedPayload);
@@ -90,27 +93,21 @@ const targetProxyMiddleware = createProxyMiddleware({
     // If no matching URL mapping found, return the original path
     return path;
   },
+  
   onProxyRes: function (proxyRes, req, res) {
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
   },
+  
   onProxyReq: function (proxyReq, req, res) {
+    console.log(">>>7777***>>");
     // Log the request details including the modified payload
-    
-    console.log('Request details:');
-    console.log('Method:', req.method);
-    console.log('Original URL:', req.originalUrl);
-    console.log('Rewritten URL:', req.url);
+    // console.log('Request details:');
+    // console.log('Method:', req.method);
+    // console.log('Original URL:', req.originalUrl);
+    // console.log('Rewritten URL:', req.url);
     console.log('Headers:', req.headers);
-
-    // Update Content-Length header based on modified payload
-    if (req.body && req.headers['content-length']) {
-      const updatedContentLength = Buffer.byteLength(req.body);
-      req.headers['content-length'] = updatedContentLength;
-      console.log('Updated Content-Length:', updatedContentLength);
-    }
-
     console.log('Payload:', req.body);
+   // console.log(res)
   },
-
 });
 module.exports = targetProxyMiddleware

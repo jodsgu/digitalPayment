@@ -37,6 +37,8 @@ app.all('*', bodyParser.json(), async (req, res, next) => {
 
 
 
+
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
