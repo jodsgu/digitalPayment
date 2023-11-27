@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require('cors');
-//const bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 //const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const dbConnection = require('./db');
@@ -19,7 +19,7 @@ const targetProxyMiddleware = require('./api/middlewares/proxy-middleware')
 
 
 // Dynamically route requests based on URL path
-app.all('*', async (req, res, next) => {
+app.all('*', bodyParser.json(), async (req, res, next) => {
   try {
     const path = req.url; // Extract the path from the URL
     console.log("Requested path:", path);

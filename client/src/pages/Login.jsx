@@ -67,8 +67,8 @@ const Login = () => {
        // const res = await axios.post('http://localhost:3000/api/v1/user-auth-tokens',
         const res = await axios.post('http://localhost:3000/login',
           {
-            login_name: values.email,
-            password: values.password
+            user_name: values.email,
+            user_password: values.password
           }, {
           headers: {
             'Content-Type': 'application/json', // Set the content type to JSON

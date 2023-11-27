@@ -3,7 +3,7 @@ const loginFieldMapping = require('../models/login-field-mappings');
 const mapLoginFormToApi = (formData) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("777", formData);
+      console.log("00000", formData);
 
       // Fetch field mappings from MongoDB
       const fieldMappings = await loginFieldMapping.find();

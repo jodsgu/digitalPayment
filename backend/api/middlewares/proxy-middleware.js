@@ -1,17 +1,9 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const UrlMapping = require('../models/urlmapings')
 // Import the LoginFieldMapping model
-const mapLoginFormToApi = require('../library/login-field-mapping'); 
+const mapLoginFormToApi = require('../library/login-field-mapping');
 
-// Helper function to parse JSON from request body
-const parseJsonBody = (req) => {
-  try {
-    return JSON.parse(req.body.toString());
-  } catch (error) {
-    console.error('Error parsing JSON from request body:', error);
-    return {};
-  }
-};
+
 
 
 
@@ -20,14 +12,14 @@ const targetProxyMiddleware = createProxyMiddleware({
   target: 'http://10.0.253.185',
   changeOrigin: true,
   pathRewrite: async (path, req) => {
-   // Parse JSON from the request body
-    const requestBody = parseJsonBody(req);
-    console.log("mmmmmmm-->",requestBody)
+    // Parse JSON from the request body
+
+   // console.log("mmmmmmm-->", req.body)
     // Extract the path from the URL
     const requestedPath = req.url;
-   // Remove query parameters from the path for lookup
+    // Remove query parameters from the path for lookup
     const pathWithoutQuery = requestedPath.split('?')[0];
-   
+
 
     let urlMapping;
     if (pathWithoutQuery.startsWith('/user-details/')) {
@@ -36,9 +28,39 @@ const targetProxyMiddleware = createProxyMiddleware({
       urlMapping = await UrlMapping.findOne({ path: pathWithoutQuery });
     }
 
-   if (urlMapping) {
+    if (urlMapping) {
       if (urlMapping.path === '/login') {
+        /* // Handle "/login" case
+        // Map login form fields to API fields using the library function
+
+       // console.log("77777");
+       // const mappedPayload = await mapLoginFormToApi(req.body);
+       // console.log("88888");
+      //  let myobj = {test1:'test1',test2:'test2'}
+        // Log the mapped payload (for debugging purposes)
+        //console.log('Mapped Login Payload:', mappedPayload);
+        //req.body = mappedPayload;
+        
+
+
+
+
+        console.log('Rewritten URL:', urlMapping.action_url);
+        return urlMapping.action_url; */
+
         // Handle "/login" case
+        // Map login form fields to API fields using the library function
+        const mappedPayload = await mapLoginFormToApi(req.body);
+
+        // Update Content-Length header based on mapped payload
+        req.headers['Content-Length'] = Buffer.byteLength(JSON.stringify(mappedPayload));
+
+        // Replace request body with mapped payload
+        req.body = JSON.stringify(mappedPayload);
+
+        // Log the mapped payload (for debugging purposes)
+        console.log('Mapped Login Payload:', mappedPayload);
+
         console.log('Rewritten URL:', urlMapping.action_url);
         return urlMapping.action_url;
 
@@ -72,7 +94,14 @@ const targetProxyMiddleware = createProxyMiddleware({
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
   },
   onProxyReq: function (proxyReq, req, res) {
-
+    console.log(">>>>>",req);
+    // Log the request details including the modified payload
+    console.log('Request details:');
+    console.log('Method:', req.method);
+    console.log('Original URL:', req.originalUrl);
+    console.log('Rewritten URL:', req.url);
+    console.log('Headers:', req.headers);
+    console.log('Payload:', req.body);
   },
 });
 module.exports = targetProxyMiddleware
