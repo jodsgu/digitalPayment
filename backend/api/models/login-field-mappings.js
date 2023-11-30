@@ -1,17 +1,15 @@
-const mongoose = require('mongoose');
-
+import mongoose from 'mongoose';
 
 const loginFieldMappingSchema = mongoose.Schema({
-
-  _id : mongoose.Schema.Types.ObjectId,
+  _id: mongoose.Schema.Types.ObjectId,
   formField: {
-    type:String,
-    required:true
+    type: String,
+    required: true,
   },
-  apiField:{
-    type:String,
-    required:true
-  }
+  apiField: {
+    type: String,
+    required: true,
+  },
+});
 
-})
-module.exports = mongoose.model('Login-field-mapping',loginFieldMappingSchema)
+export default mongoose.model('Login-field-mapping', loginFieldMappingSchema);

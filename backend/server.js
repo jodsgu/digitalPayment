@@ -1,45 +1,29 @@
-const express = require("express");
-const cors = require('cors');
-const bodyParser = require('body-parser');
-//const { createProxyMiddleware } = require('http-proxy-middleware');
+import express from 'express';
+import bodyParser from 'body-parser'
+import dbConnection from './db.js';
 
-const dbConnection = require('./db');
-//const UrlMapping = require('./api/models/urlmapings');
-const port = 3000;
 
-const app = express();
-
-app.use(cors());
+import handleLogin from './api/middlewares/path-to-handle-login.js'
 dbConnection();
+const app = express();
+app.use(bodyParser.json());
 
-//import proxy middleware
-const targetProxyMiddleware = require('./api/middlewares/proxy-middleware')
-
-
-
-
-// Dynamically route requests based on URL path
-app.all('*', bodyParser.json(), async (req, res, next) => {
-  try {
+app.all('*', async (req, res) => {
+  try{
     const path = req.url; // Extract the path from the URL
     console.log("Requested path:", path);
 
-    // Proxy the request to the target server, replacing the path with the action_url
-    targetProxyMiddleware(req, res, next, {});
-    
-  } catch (error) {
+    await handleLogin(req, res);
+  }catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error11' });
   }
+
+
+
+  
 });
 
-
-
-
-
-
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+app.listen(3000, () => {
+  console.log('Server running on http://localhost:3000');
 });

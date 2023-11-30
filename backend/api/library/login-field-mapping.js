@@ -1,4 +1,7 @@
-const loginFieldMapping = require('../models/login-field-mappings');
+//const loginFieldMapping = require('../models/login-field-mappings');
+import loginFieldMapping from '../models/login-field-mappings.js'
+
+
 
 const mapLoginFormToApi = (formData) => {
   return new Promise(async (resolve, reject) => {
@@ -19,9 +22,9 @@ const mapLoginFormToApi = (formData) => {
           apiRequest[apiField] = formData[formField];
         } else {
           // Handle the case where a form field is missing in formData
-          console.error(`Form field "${formField}" is missing in the formData.`);
+          //console.error(`Form field "${formField}" is missing in the formData.`);
           // Optionally, you can throw an error, log a message, or handle it in another way
-          reject(apiRequest);
+          reject({ error: `Form field "${formField}" is missing in the formData.` });
         }
       }
 
@@ -34,4 +37,5 @@ const mapLoginFormToApi = (formData) => {
   });
 };
 
-module.exports = mapLoginFormToApi;
+export default mapLoginFormToApi;
+

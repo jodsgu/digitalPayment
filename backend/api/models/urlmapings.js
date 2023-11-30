@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 
 const urlmapingSchema = mongoose.Schema({
@@ -16,4 +16,4 @@ const urlmapingSchema = mongoose.Schema({
   }
 
 })
-module.exports = mongoose.model('Urlmaping',urlmapingSchema)
+export default mongoose.model('Urlmaping',urlmapingSchema)

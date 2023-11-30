@@ -39,16 +39,16 @@ const targetProxyMiddleware = createProxyMiddleware({
         let myobj = {test1:'test1',test2:'test2'}
         // Log the mapped payload (for debugging purposes)
         console.log('Mapped Login Payload:', mappedPayload);
-        req.body = mappedPayload;
+        req.body = mappedPayload;*/
         
 
 
 
 
         console.log('Rewritten URL:', urlMapping.action_url);
-        return urlMapping.action_url; */
+        return urlMapping.action_url; 
 
-        // Handle "/login" case
+        /* // Handle "/login" case
         // Map login form fields to API fields using the library function
         const mappedPayload = await mapLoginFormToApi(req.body);
 
@@ -62,7 +62,7 @@ const targetProxyMiddleware = createProxyMiddleware({
         console.log('Mapped Login Payload:', mappedPayload);
 
         console.log('Rewritten URL:', urlMapping.action_url);
-        return urlMapping.action_url;
+        return urlMapping.action_url; */
 
       } else if (urlMapping.path.startsWith('/user-details/')) {
         // Handle "/user-details/:user_id" case
@@ -102,12 +102,12 @@ const targetProxyMiddleware = createProxyMiddleware({
     console.log('Rewritten URL:', req.url);
     console.log('Headers:', req.headers);
 
-    // Update Content-Length header based on modified payload
+    /* // Update Content-Length header based on modified payload
     if (req.body && req.headers['content-length']) {
       const updatedContentLength = Buffer.byteLength(req.body);
       req.headers['content-length'] = updatedContentLength;
       console.log('Updated Content-Length:', updatedContentLength);
-    }
+    } */
 
     console.log('Payload:', req.body);
   },
