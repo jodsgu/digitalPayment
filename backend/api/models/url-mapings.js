@@ -13,7 +13,24 @@ const urlmapingSchema = mongoose.Schema({
     type:String,
     required:true,
     unique: true
+  },
+  data_mapping : {
+    type: Object,
+    properties: {
+      login_name: {
+      type: String
+      },
+      password: {
+        type: String
+        
+      }
+    }
   }
 
+
+
+
 })
-export default mongoose.model('Urlmaping',urlmapingSchema)
+export default mongoose.model('Url-maping',urlmapingSchema)
+
+

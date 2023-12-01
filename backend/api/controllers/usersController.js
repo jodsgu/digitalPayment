@@ -1,18 +1,18 @@
-const mongoose = require('mongoose');
+import   mongoose  from 'mongoose';
 
 //import user model
-const User = require('../models/users');
+import   User  from '../models/users.js';
 
 
 
 
 
 //user session save in DB 
-exports.sessionSave = async (req, res, next) => {
-
+const sessionSave = async (req, res, next) => {
+  
 
   try {
-    // console.log(">>>>",req)
+    //
     const userData = new User({
       _id: new mongoose.Types.ObjectId(),
       user_id: req.body.user_id,
@@ -39,7 +39,7 @@ exports.sessionSave = async (req, res, next) => {
 }
 
 //user session update in DB
-exports.sessionUpdate = async (req, res, next) => {
+const sessionUpdate = async (req, res, next) => {
   try {
     
     const {user_id, sessionId } = req.body
@@ -63,7 +63,10 @@ exports.sessionUpdate = async (req, res, next) => {
 
 
 
-//user Authentication 
-exports.userAuthentication = async (req, res, next) => {
-}
+export default {
+  sessionSave,
+  sessionUpdate
+  
+
+};
 

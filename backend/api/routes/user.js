@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-//controller
-const userController = require('../controllers/usersController');
+//controller  ../controllers/usersController.js
+import userController from '../controllers/usersController.js';
 
 
 //session store in DB || POST
@@ -13,7 +13,6 @@ router.post('/sessionStore',userController.sessionSave)
 router.patch('/sessionUpdate',userController.sessionUpdate)
 
 
-//user  Authentication  || GET
-router.post('/checkUser',userController.userAuthentication)
 
-module.exports = router;
+
+export default router;

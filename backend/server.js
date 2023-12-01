@@ -1,12 +1,18 @@
 import express from 'express';
 import bodyParser from 'body-parser'
 import dbConnection from './db.js';
-
+//router
+import userRouter from './api/routes/user.js';
 
 import handleLogin from './api/middlewares/path-to-handle-login.js'
+
+
 dbConnection();
 const app = express();
 app.use(bodyParser.json());
+
+// Mount the /users router
+app.use('/users', userRouter);
 
 app.all('*', async (req, res) => {
   try{
