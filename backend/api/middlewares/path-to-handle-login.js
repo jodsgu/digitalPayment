@@ -6,91 +6,73 @@ import UrlMapping from '../models/url-mapings.js'
 const handleLogin = async (req, res) => {
   try {
     let apiTarget = 'http://10.0.253.185';
+    
+    let apiUrl;
+    let body;
+    const pathSegments = req.url.split('/');
+    let entityId;
+    
 
-    // Extract the path from the URL
-    const requestedPath = req.url;
-    // Remove query parameters from the path for lookup
-    const pathWithoutQuery = requestedPath.split('?')[0];
-
-
-    let urlMapping;
-    if (pathWithoutQuery.startsWith('/user-details/')) {
-      urlMapping = await UrlMapping.findOne({ path: '/user-details/:user_id' });
-    } else {
-      urlMapping = await UrlMapping.findOne({ path: pathWithoutQuery });
+    if (pathSegments.length > 2) {
+      entityId = pathSegments[pathSegments.length - 1];
     }
 
-    if (urlMapping) {
-      let apiUrl;
-      let mappedPayload;
-      let body;
-      let queryString;
-      let queryParams;
-      if (urlMapping.path === '/login') {
+    const pathWithoutQuery = req.url.split('?')[0];
 
-        // Map login form fields to API fields using the library function
-        mappedPayload = await mapLoginFormToApi(req.body, urlMapping.data_mapping);
-        // Log the mapped payload (for debugging purposes)
-        //console.log('Mapped Login Payload:', mappedPayload);
+    console.log("1111111", entityId,pathWithoutQuery);
+   
+   
 
-        body = JSON.stringify(mappedPayload);
-        apiUrl = `${apiTarget}${urlMapping.action_url}`;
+    if(req.method === 'POST' && !entityId)   //POST request
+    {
+      console.log("IN POST REQUEST ")
+      const urlMapping = await UrlMapping.findOne({ path: pathWithoutQuery });
+      // Map login form fields to API fields using the library function
+      const mappedPayload = await mapLoginFormToApi(req.body, urlMapping.data_mapping);
+      body = JSON.stringify(mappedPayload);
+      apiUrl = `${apiTarget}${urlMapping.action_url}`;
 
-      } else if (urlMapping.path.startsWith('/user-details/')) {
-
-        const user_id = requestedPath.split('/').pop(); // Extract user_id from the path
-        const rewrittenPath = urlMapping.action_url.replace(':user_id', user_id);
-        // console.log('Rewritten URL:', rewrittenPath);
-        apiUrl = `${apiTarget}${rewrittenPath}`;
-        //console.log('----------------:', apiUrl);
-        
-      } else if (urlMapping.path === '/role-maps') {
-        // Handle "/role-maps" case with query parameters
-        queryParams = {
-          action: req.query.action || 'default',
-          'filter-user-id': req.query['filter-user-id'] || 'default',
-        };
-
-        queryString = Object.entries(queryParams)
-          .map(([key, value]) => `${key}=${value}`)
-          .join('&');
-        //console.log(">>>>>>>>>>>11",queryString)
-
-        apiUrl = `${apiTarget}${urlMapping.action_url}`;
-
-        //console.log("(*(((((",apiUrl);
-
-      }
-
-      // Make a POST request to the external server
-      const response = await fetch(`${apiUrl}?${queryString}`, {
-
-        method: `${req.method}`,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(req.headers.authorization ? { Authorization: `${req.headers.authorization}` } : {}),
-
-        },
-        ...(req.method === 'POST' ? { body: `${body}` } : {}),
-
-      });
+      
 
 
-
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status} ${response.statusText}`);
-      }
-
-      // Parse the response JSON
-      const responseData = await response.json();
-
-      // Send the response back to the client
-      res.json(responseData);
-
-    } else {
-      const error = "Page not found";
-      throw new Error(error);
     }
+    else if(req.method === 'GET' && entityId)  //GET request
+    {
+      console.log("IN GET REQUEST WITH ID")
+    }
+    else if(req.method === 'GET' && req.query.action && req.query.action === 'filter') //GET request to list entities
+    {
+      console.log("IN GET REQUEST WITH ID with query parameter")
+    }else{
+      console.log("HERE")
+    }
+
+    // Make a POST request to the external server
+    const response = await fetch(`${apiUrl}`, {
+
+      method: `${req.method}`,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(req.headers.authorization ? { Authorization: `${req.headers.authorization}` } : {}),
+
+      },
+      ...(req.method === 'POST' ? { body: `${body}` } : {}),
+
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status} ${response.statusText}`);
+    }
+
+    // Parse the response JSON
+    const responseData = await response.json();
+
+    // Send the response back to the client
+    res.json(responseData);
+
+
+
+
 
   } catch (error) {
     //console.log(">>>>", error.message);
