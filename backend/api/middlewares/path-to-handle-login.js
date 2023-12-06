@@ -6,9 +6,11 @@ import UrlMapping from '../models/url-mapings.js'
 const handleLogin = async (req, res) => {
   try {
     let apiTarget = 'http://10.0.253.185';
-    
+    let urlMapping;
     let apiUrl;
     let body;
+    let queryParams;
+    let queryString;
     const pathSegments = req.url.split('/');
     let entityId;
     
@@ -19,14 +21,10 @@ const handleLogin = async (req, res) => {
 
     const pathWithoutQuery = req.url.split('?')[0];
 
-    console.log("1111111", entityId,pathWithoutQuery);
-   
-   
-
     if(req.method === 'POST' && !entityId)   //POST request
     {
       console.log("IN POST REQUEST ")
-      const urlMapping = await UrlMapping.findOne({ path: pathWithoutQuery });
+      urlMapping = await UrlMapping.findOne({ path: pathWithoutQuery });
       // Map login form fields to API fields using the library function
       const mappedPayload = await mapLoginFormToApi(req.body, urlMapping.data_mapping);
       body = JSON.stringify(mappedPayload);
@@ -39,16 +37,36 @@ const handleLogin = async (req, res) => {
     else if(req.method === 'GET' && entityId)  //GET request
     {
       console.log("IN GET REQUEST WITH ID")
-    }
-    else if(req.method === 'GET' && req.query.action && req.query.action === 'filter') //GET request to list entities
-    {
-      console.log("IN GET REQUEST WITH ID with query parameter")
-    }else{
-      console.log("HERE")
-    }
+      const url = '/' + pathWithoutQuery.split('/')[1];
+      urlMapping = await UrlMapping.findOne({ path: `${url}` });
+      apiUrl = `${apiTarget}${urlMapping.action_url}/${entityId}`;
+      
 
+    }
+    else if(req.method === 'GET' && !entityId && req.query.action && req.query.action === 'filter') //GET request to list entities
+    {
+      console.log("IN GET REQUEST WITH ID with query parameter",req.query)
+      urlMapping = await UrlMapping.findOne({ path: `${pathWithoutQuery}` });
+      queryParams = {
+        action: req.query.action || 'default',
+        'filter-user-id': req.query['filter-user-id'] || 'default',
+      };
+      queryString = Object.entries(queryParams)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&');
+    
+
+    apiUrl = `${apiTarget}${urlMapping.action_url}`;
+
+    }
+    else if(req.method === 'PUT' || req.method ==='PATCH'  && entityId){
+      console.log("IN PUT REQUEST WITH ID ")
+    }
+    else if(req.method === 'DELETE' && entityId){
+      console.log("IN DELETE REQUEST WITH ID ")
+    }
     // Make a POST request to the external server
-    const response = await fetch(`${apiUrl}`, {
+    const response = await fetch(`${apiUrl}?${queryString}`, {
 
       method: `${req.method}`,
       headers: {
