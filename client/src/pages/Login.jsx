@@ -40,12 +40,12 @@ const Login = () => {
         // Generate a session ID using uuid
           const sessionId = uuidv4();
           // Save the sessionId in a cookie
-          document.cookie = `sessionId=${sessionId}; max-age=60`; // Max age in seconds (e.g., 120/2 minit)   86400 24hour
+          document.cookie = `sessionId=${sessionId}; max-age=86400`; // Max age in seconds (e.g., 120/2 minit)   86400 24hour
           setTimeout(() => {
 
             document.cookie = 'sessionId=; max-age=0'; // Remove the cookie
 
-          }, 60000)  // 120000/2 minit  86400000 24 hour
+          }, 86400000)  // 120000/2 minit  86400000 24 hour
 
 
           const res = await axios.patch('http://localhost:3000/users/sessionUpdate', {
@@ -84,12 +84,12 @@ const Login = () => {
           // Generate a session ID using uuid
           const sessionId = uuidv4();
           // Save the sessionId in a cookie
-          document.cookie = `sessionId=${sessionId}; max-age=60`; // Max age in seconds (e.g., 120/2 minit)   86400 24hour
+          document.cookie = `sessionId=${sessionId}; max-age=86400`; // Max age in seconds (e.g., 120/2 minit)   86400 24hour
           setTimeout(() => {
 
             document.cookie = 'sessionId=; max-age=0'; // Remove the cookie
 
-          }, 60000)  // 120000/2 minit  86400000 24 hour
+          }, 86400000)  // 120000/2 minit  86400000 24 hour
           
           
           //navigate('/');

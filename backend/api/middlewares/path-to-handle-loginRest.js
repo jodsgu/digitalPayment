@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import mapLoginFormToApi from '../library/login-field-mapping.js'
 import UrlMapping from '../models/url-mapings.js'
-
+import extractEntityIdFromUrl from '../library/extract-entity-id-from-url.js';
 
 const handleLogin = async (req, res) => {
   try {
@@ -13,16 +13,21 @@ const handleLogin = async (req, res) => {
     let queryString;
 
 
-    
+    /* const pathSegments = req.url.split('/');
+    let entityId;
+    if (pathSegments.length > 2) {
+      entityId = pathSegments[pathSegments.length - 1];
+    } */
+
+    const entityId = await extractEntityIdFromUrl(req.url);
 
     const pathWithoutQuery = req.url.split('?')[0];
-    console.log("****", pathWithoutQuery);
+    console.log("****",pathWithoutQuery);
 
 
-    if (req.method === 'POST')   //POST request
+    if (req.method === 'POST' && !entityId)   //POST request
     {
       console.log("IN POST REQUEST ")
-
       urlMapping = await UrlMapping.findOne({ path: pathWithoutQuery });
       if (urlMapping) {
         // Map login form fields to API fields using the library function
@@ -34,56 +39,55 @@ const handleLogin = async (req, res) => {
         const error = "Page not found";
         throw new Error(error);
       }
+     
+
+    }
+    else if (req.method === 'GET' && entityId)  //GET request
+    {
+      console.log("IN GET REQUEST WITH ID")
+      const url = '/' + pathWithoutQuery.split('/')[1];
+      urlMapping = await UrlMapping.findOne({ path: `${url}` });
+      apiUrl = `${apiTarget}${urlMapping.action_url}/${entityId}`;
 
 
     }
-    else if (req.method === 'GET')  //GET request
+    else if (req.method === 'GET' && !entityId && req.query.action && req.query.action === 'filter') //GET request to list entities
     {
-      console.log("IN GET REQUEST WITH ID")
-      if (req.query.action && req.query.action === 'filter') {
-        console.log("Query string")
-        urlMapping = await UrlMapping.findOne({ path: `${pathWithoutQuery}` });
+      console.log("IN GET REQUEST WITH  Query Parameter", req.query)
+      urlMapping = await UrlMapping.findOne({ path: `${pathWithoutQuery}` });
 
-        if (urlMapping) {
-          queryParams = {
-            action: req.query.action || 'default',
-          };
+      queryParams = {
+        action: req.query.action || 'default',
+      };
 
-          //making queryParams dynamic
-          Object.keys(req.query).forEach(key => {
+      //making queryParams dynamic
+      Object.keys(req.query).forEach(key => {
 
-            if (key !== 'action') {
-              queryParams[key] = req.query[key];
-            }
-          });
-
-          queryString = Object.entries(queryParams)
-            .map(([key, value]) => `${key}=${value}`)
-            .join('&');
-
-          apiUrl = `${apiTarget}${urlMapping.action_url}`;
-        } else {
-          const error = "Page not found";
-          throw new Error(error);
+        if (key !== 'action') {
+          queryParams[key] = req.query[key];
         }
+      });
 
-      } else {
-        console.log("Normal get request ")
-        urlMapping = await UrlMapping.findOne({ path: pathWithoutQuery });
-        if (urlMapping) {
-          apiUrl = `${apiTarget}${urlMapping.action_url}`;
+      queryString = Object.entries(queryParams)
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
 
-        }
-        else {
-          const error = "Page not found";
-          throw new Error(error);
-        }
-      }
-     }
-    
+      apiUrl = `${apiTarget}${urlMapping.action_url}`;
+
+    }
+    else if (req.method === 'PUT' || req.method === 'PATCH' && entityId) {
+      console.log("IN PUT REQUEST WITH ID ")
+      const url = '/' + pathWithoutQuery.split('/')[1];
+      urlMapping = await UrlMapping.findOne({ path: `${url}` });
+      apiUrl = `${apiTarget}${urlMapping.action_url}/${entityId}`;
+
+    }
+    else if (req.method === 'DELETE' && entityId) {
+      console.log("IN DELETE REQUEST WITH ID ")
+    }
 
 
-    // console.log(">>>>>>>>>>>>>",req.headers.authorization)
+    console.log(">>>>>>>>>>>>>",req.headers.authorization)
 
     // Make a POST GET PUT PATCH DELETE request to the external server
     const response = await fetch(`${apiUrl}?${queryString}`, {
